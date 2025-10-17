@@ -1,0 +1,7 @@
+﻿global using E_commerce.Domain.Contracts;
+global using E_commerce.Domain.Entities;
+global using E_commerce.Domain.Entities.Products;
+global using E_commerce.Persistence.DbInitializers;
+global using Microsoft.EntityFrameworkCore;
+global using Microsoft.Extensions.Configuration;
+global using Microsoft.Extensions.DependencyInjection;
