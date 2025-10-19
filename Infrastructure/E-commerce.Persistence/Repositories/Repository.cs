@@ -29,4 +29,21 @@ internal class Repository<TEntity, TKey>(ApplicationDbContext dbContext)
     {
         dbContext.Set<TEntity>().Update(entity);
     }
+
+
+
+    public async Task<IEnumerable<TEntity>> GetAllAsync(ISpecification<TEntity> specification, CancellationToken cancellationToken = default)
+    {
+        return await dbContext.Set<TEntity>().ApplySpecification(specification).ToListAsync(cancellationToken);
+    }
+
+    public async Task<TEntity?> GetAsync(ISpecification<TEntity> specification, CancellationToken cancellationToken = default)
+    {
+        return await dbContext.Set<TEntity>().ApplySpecification(specification).FirstOrDefaultAsync(cancellationToken);
+    }
+
+    public async Task<int> CountAsync(ISpecification<TEntity> specification, CancellationToken cancellationToken = default)
+    {
+        return await dbContext.Set<TEntity>().ApplySpecification(specification).CountAsync(cancellationToken);
+    }
 }
