@@ -1,4 +1,5 @@
-﻿using E_commerce.ServiceAbstraction;
+﻿using E_commerce.Presentation.Attributes;
+using E_commerce.ServiceAbstraction;
 using E_commerce.Shared.DataTransferObjects;
 using E_commerce.Shared.DataTransferObjects.Products;
 using Microsoft.AspNetCore.Mvc;
@@ -9,6 +10,7 @@ public class ProductsController(IProductService productService)
     : APIBaseController
 {
     //Get All Products (with filtering, sorting, pagination , search)
+    [RedisCash]
     [HttpGet]
     public async Task<ActionResult<PaginatedResult<ProductResponse>>> GetProducts([FromQuery] ProductQueryParameters parameters, CancellationToken cancellationToken = default)
     {
