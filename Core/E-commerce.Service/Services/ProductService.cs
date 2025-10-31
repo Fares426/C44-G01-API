@@ -1,6 +1,7 @@
 ﻿
 using E_commerce.Domain.Entities.Products;
 using E_commerce.Service.Specifications;
+using E_commerce.ServiceAbstraction.Common;
 using E_commerce.Shared.DataTransferObjects;
 
 namespace E_commerce.Service.Services;
@@ -16,12 +17,12 @@ internal class ProductService(IUnitOfWork unitOfWork, IMapper mapper)
         return mapper.Map<IEnumerable<BrandResponse>>(brands);
     }
 
-    public async Task<ProductResponse?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+    public async Task<Result<ProductResponse>> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
         var product = await unitOfWork.GetRepository<Product, int>()
             .GetAsync(new ProductWithBrandTypeSpecification(id), cancellationToken);
 
-        return mapper.Map<ProductResponse>(product);
+        return product is null ? Error.NotFound() : mapper.Map<ProductResponse>(product);
     }
 
     public async Task<PaginatedResult<ProductResponse>> GetProductsAsync(ProductQueryParameters parameters, CancellationToken cancellationToken = default)

@@ -9,9 +9,9 @@ Accept: application/json
 ###
 
 
-GET {{E_commerce.Web_HostAddress}}/api/Products/10
+GET {{E_commerce.Web_HostAddress}}/api/Products/65
 Accept: application/json
 ###
 
-GET {{E_commerce.Web_HostAddress}}/api/Products/22
+GET {{E_commerce.Web_HostAddress}}/api/Products/500/22
 Accept: application/json
