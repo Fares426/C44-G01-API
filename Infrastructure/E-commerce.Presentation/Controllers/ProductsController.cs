@@ -1,5 +1,8 @@
-﻿using E_commerce.ServiceAbstraction;
+﻿using E_commerce.Presentation.Attributes;
+using E_commerce.ServiceAbstraction;
+using E_commerce.Shared.DataTransferObjects;
 using E_commerce.Shared.DataTransferObjects.Products;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace E_commerce.Presentation.Controllers;
@@ -8,19 +11,21 @@ public class ProductsController(IProductService productService)
     : APIBaseController
 {
     //Get All Products (with filtering, sorting, pagination , search)
+    [RedisCash]
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<ProductResponse>>> GetProducts(CancellationToken cancellationToken = default)
+    public async Task<ActionResult<PaginatedResult<ProductResponse>>> GetProducts([FromQuery] ProductQueryParameters parameters, CancellationToken cancellationToken = default)
     {
-        var response = await productService.GetProductsAsync(cancellationToken);
+        var response = await productService.GetProductsAsync(parameters, cancellationToken);
         return Ok(response);
     }
 
     //Get By Id (int id)
+    [Authorize()]
     [HttpGet("{id}")]
     public async Task<ActionResult<ProductResponse>> GetById(int id, CancellationToken cancellationToken = default)
     {
         var response = await productService.GetByIdAsync(id, cancellationToken);
-        return Ok(response);
+        return HandleResult(response);
     }
 
     //Get Brands

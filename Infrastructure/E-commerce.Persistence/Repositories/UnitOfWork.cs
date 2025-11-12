@@ -1,6 +1,6 @@
 ﻿namespace E_commerce.Persistence.Repositories;
 
-internal class UnitOfWork(ApplicationDbContext dbContext) : IUnitOfWork
+internal class UnitOfWork(StoreDbContext dbContext) : IUnitOfWork
 {
     public readonly Dictionary<string, object> _repositories = [];
     public IRepository<TEntity, TKey> GetRepository<TEntity, TKey>() where TEntity : Entity<TKey>

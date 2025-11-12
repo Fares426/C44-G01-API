@@ -1,10 +1,17 @@
-﻿
-
+﻿using E_commerce.Domain.Entities.Auth;
+using E_commerce.Domain.Entities.OrderEntities;
+using E_commerce.Persistence.Context.AuthContext;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
 using System.Text.Json;
 
 namespace E_commerce.Persistence.DbInitializers;
 
-internal class DbInitializer(ApplicationDbContext dbContext)
+internal class DbInitializer(StoreDbContext dbContext,
+    AuthDbContext authDbContext,
+    RoleManager<IdentityRole> roleManager,
+    UserManager<ApplicationUser> userManager,
+    ILogger<DbInitializer> logger)
     : IDbInitializer
 {
     public async Task InitializeAsync()
@@ -57,12 +64,60 @@ internal class DbInitializer(ApplicationDbContext dbContext)
                 await dbContext.SaveChangesAsync();
             }
 
+            if (!dbContext.DeliveryMethods.Any())
+            {
+                var deliveryData = await File.ReadAllTextAsync(@"..\Infrastructure\E-commerce.Persistence\Context\DataSeed\delivery.json");
+                var delivery = JsonSerializer.Deserialize<List<DeliveryMethod>>(deliveryData);
+                if (delivery is not null && delivery.Any())
+                {
+                    dbContext.DeliveryMethods.AddRange(delivery);
+                }
+                await dbContext.SaveChangesAsync();
+            }
+
 
 
         }
         catch (Exception)
         {
             throw;
+        }
+    }
+
+    public async Task InitializeAuthDbAsync()
+    {
+        await authDbContext.Database.MigrateAsync();
+
+        if (!roleManager.Roles.Any())
+        {
+            await roleManager.CreateAsync(new IdentityRole("Admin"));
+            await roleManager.CreateAsync(new IdentityRole("SuperAdmin"));
+        }
+
+
+        if (!userManager.Users.Any())
+        {
+            var superAdminUser = new ApplicationUser
+            {
+                DisplayName = "Super Admin",
+                Email = "SuperAdmin@gmail.com",
+                UserName = "SuperAdmin",
+                PhoneNumber = "012345678900"
+            };
+            var adminUser = new ApplicationUser
+            {
+                DisplayName = "Admin",
+                Email = "Admin@gmail.com",
+                UserName = "Admin",
+                PhoneNumber = "012345678900"
+            };
+
+            await userManager.CreateAsync(superAdminUser, "SuperAdmin@123");
+            await userManager.CreateAsync(adminUser, "Admin@123");
+
+
+            await userManager.AddToRoleAsync(superAdminUser, "SuperAdmin");
+            await userManager.AddToRoleAsync(adminUser, "Admin");
         }
     }
 }

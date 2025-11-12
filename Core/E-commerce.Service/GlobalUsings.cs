@@ -1,4 +1,10 @@
 ﻿global using AutoMapper;
 global using E_commerce.Domain.Contracts;
+global using E_commerce.Domain.Entities.Auth;
+global using E_commerce.Service.Contracts;
 global using E_commerce.ServiceAbstraction;
+global using E_commerce.ServiceAbstraction.Common;
+global using E_commerce.Shared.DataTransferObjects.Auth;
 global using E_commerce.Shared.DataTransferObjects.Products;
+global using E_commerce.Shared.DataTransferObjects.Users;
+global using Microsoft.AspNetCore.Identity;
