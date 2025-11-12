@@ -22,7 +22,13 @@ internal class ProductService(IUnitOfWork unitOfWork, IMapper mapper)
         var product = await unitOfWork.GetRepository<Product, int>()
             .GetAsync(new ProductWithBrandTypeSpecification(id), cancellationToken);
 
-        return product is null ? Error.NotFound() : mapper.Map<ProductResponse>(product);
+        if (product is null)
+        {
+            return Error.NotFound(); //Implicit conversion to Result<ProductResponse>
+        }
+        return mapper.Map<ProductResponse>(product); //Implicit conversion to Result<ProductResponse>
+
+        //return product is null ? Error.NotFound() : mapper.Map<ProductResponse>(product);
     }
 
     public async Task<PaginatedResult<ProductResponse>> GetProductsAsync(ProductQueryParameters parameters, CancellationToken cancellationToken = default)

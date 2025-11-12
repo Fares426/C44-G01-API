@@ -2,6 +2,7 @@
 using E_commerce.ServiceAbstraction;
 using E_commerce.Shared.DataTransferObjects;
 using E_commerce.Shared.DataTransferObjects.Products;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace E_commerce.Presentation.Controllers;
@@ -19,11 +20,12 @@ public class ProductsController(IProductService productService)
     }
 
     //Get By Id (int id)
+    [Authorize()]
     [HttpGet("{id}")]
     public async Task<ActionResult<ProductResponse>> GetById(int id, CancellationToken cancellationToken = default)
     {
         var response = await productService.GetByIdAsync(id, cancellationToken);
-        return Ok(response);
+        return HandleResult(response);
     }
 
     //Get Brands

@@ -9,7 +9,6 @@ public class Result
 
     protected Result() { }
 
-
     protected Result(Error error)
     {
         _errors.Add(error);
@@ -32,7 +31,7 @@ public class Result<TValue> : Result
     public TValue Value => IsSuccess
         ? _value
         : throw new InvalidOperationException("Cannot access the value of a failed result.");
-    private Result(TValue value)
+    private Result(TValue value) : base()
     {
         _value = value;
     }
@@ -49,8 +48,9 @@ public class Result<TValue> : Result
     public static new Result<TValue> Fail(List<Error> errors) => new(errors);
 
 
+
+
     public static implicit operator Result<TValue>(TValue value) => Ok(value);
     public static implicit operator Result<TValue>(Error error) => Fail(error);
     public static implicit operator Result<TValue>(List<Error> errors) => Fail(errors);
-
 }

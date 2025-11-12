@@ -1,9 +1,14 @@
 
 using E_commerce.Domain.Contracts;
+using E_commerce.Infrastructure.Service;
 using E_commerce.Persistence.DependencyInjection;
+using E_commerce.Presentation.Controllers;
 using E_commerce.Service.DependencyInjection;
 using E_commerce.Web.Handlers;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace E_commerce.Web;
 
@@ -16,8 +21,12 @@ public class Program
         // Add services to the container.
 
         builder.Services.AddControllers();
-        builder.Services.AddPersistenceServices(builder.Configuration);
-        builder.Services.AddApplicationServices();
+        builder.Services.AddControllers()
+            .AddApplicationPart(typeof(AuthController).Assembly);
+        builder.Services.AddApplicationServices()
+            .AddPersistenceServices(builder.Configuration)
+            .AddInfrastructureServices(builder.Configuration);
+        builder.Services.Configure<JWTOptions>(builder.Configuration.GetSection(JWTOptions.SectionName));
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
@@ -41,12 +50,33 @@ public class Program
                 return new BadRequestObjectResult(problem);
             };
         });
+
+        builder.Services.AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        }).AddJwtBearer(options =>
+        {
+            var jwt = builder.Configuration.GetSection(JWTOptions.SectionName).Get<JWTOptions>();
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = jwt.Issuer,
+                ValidAudience = jwt.Audience,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.Key)),
+                ClockSkew = TimeSpan.Zero
+            };
+        });
         var app = builder.Build();
 
         #region Initialize Db
         var scope = app.Services.CreateScope();
         var initializer = scope.ServiceProvider.GetRequiredService<IDbInitializer>();
         await initializer.InitializeAsync();
+        await initializer.InitializeAuthDbAsync();
         #endregion
 
         //app.UseCustomExceptionHandler();
@@ -60,6 +90,8 @@ public class Program
         }
 
         app.UseHttpsRedirection();
+
+        app.UseAuthentication();
 
         app.UseAuthorization();
 
